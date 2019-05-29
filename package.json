@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "antd": "^3.19.1",
+    "apollo-boost": "^0.4.0",
+    "apollo-link-ws": "^1.0.17",
+    "graphql": "^14.3.1",
+    "install": "^0.12.2",
+    "moment": "^2.24.0",
+    "npm": "^6.9.0",
     "react": "^16.8.6",
+    "react-apollo-hooks": "^0.4.5",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "styled-components": "^4.2.0",
+    "subscriptions-transport-ws": "^0.9.16"
   },
   "scripts": {
     "start": "react-scripts start",
