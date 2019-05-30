@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import gql from "graphql-tag";
 import { useQuery } from "react-apollo-hooks";
 import { withApollo } from "react-apollo";
-import { async } from "q";
 import ChatRoom from "../Components/ChatRoom";
 import ChatRoomList from "../Components/ChatRoomList";
 
@@ -21,18 +20,6 @@ const USER_QUERY = gql`
 `;
 
 function Main({ client }) {
-  // useEffect(() => {
-
-  //   async function getUserData() {
-  //     const res = await client.query({
-  //       query: USER_QUERY
-  //     })
-  //     setUser(res)
-
-  //   }
-  //   getUserData()
-  // }, []);
-
   const [user, setUser] = useState(null);
   const [chatRoomId, setChatRoomId] = useState("");
   return (

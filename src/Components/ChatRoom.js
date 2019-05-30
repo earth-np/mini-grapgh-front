@@ -40,7 +40,12 @@ const CREATE_MESSAGE = gql`
   mutation createMes($text: String!, $userId: ID!, $roomId: ID!){
     sentMessage(text: $text, userId: $userId, roomId: $roomId){
       id
+      createdAt
       text
+      sentBy {
+        id
+
+      }
     }
   }
 `
@@ -53,7 +58,7 @@ const ChatRoom = ({ chatRoomId }) => {
   return (
     <div>
       <Header>
-        <h1 style={{ color: "white" }}>{chatRoomId}</h1>
+        <h1 style={{ color: "white", marginBottom: '0px' }}>{chatRoomId}</h1>
       </Header>
       <MyContent>
         <ChatMessage chatRoomId={chatRoomId} />
@@ -69,7 +74,35 @@ const ChatRoom = ({ chatRoomId }) => {
 const InputMessage = ({ chatRoomId }) => {
   const [text,setText] = useState('')
   const sendMessage = useMutation(CREATE_MESSAGE, {
-    variables: { text, roomId: chatRoomId, userId: localStorage.getItem('userId')},
+    variables: { text, roomId: chatRoomId, userId: localStorage.getItem('userId')}, 
+    optimisticResponse: {
+      sentMessage:{
+        createdAt: new Date(),
+        id: "123",
+        sentBy:{
+          id: localStorage.getItem('userId'),
+          __typename: "User"
+        },
+        text: 'hihi mock message',
+        __typename: "Message"
+      }
+    },
+
+    update: (client, mutationResult) => {
+      const data = client.readQuery({
+        query: MESSAGES_IN_ROOM_QUERY,
+        variables: { id: chatRoomId }
+      });
+      const { sentMessage } = mutationResult.data;
+      client.writeQuery({
+        query: MESSAGES_IN_ROOM_QUERY,
+        variables: { id: chatRoomId },
+        data: {
+          messagesInRoom: [sentMessage,...data.messagesInRoom ]
+        }
+      });
+      
+    }
   });
   return (
     <Row>
@@ -97,11 +130,16 @@ const NewMessage = ({ chatRoomId }) => {
         variables: { id: chatRoomId }
       });
       const { newMessage } = subscriptionData.data;
+      let shouldUpdate = !(localStorage.getItem('userId') === newMessage.sentBy.id);
+      console.log('subscribtion',newMessage.sentBy.id,localStorage.getItem('userId'));
+      console.log('check',newMessage.id);
+      let {messagesInRoom} = data
+      if(shouldUpdate) messagesInRoom = [newMessage,...messagesInRoom]
       client.writeQuery({
         query: MESSAGES_IN_ROOM_QUERY,
         variables: { id: chatRoomId },
         data: {
-          messagesInRoom: [...data.messagesInRoom, newMessage]
+          messagesInRoom
         }
       });
     }
@@ -116,7 +154,8 @@ const ChatMessage = ({ chatRoomId }) => {
   });
   if (loading) return <div>Load Messages ...</div>;
   if (error) return <div>error</div>;
-  const messages = data.messagesInRoom.map(message => {
+  if( !data.messagesInRoom) return <div>earth</div>;
+  const messages = data.messagesInRoom.map((message = {}) => {
     return {
       actions: [<span />],
       author: message.sentBy.name,

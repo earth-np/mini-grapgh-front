@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import './App.css';
-import ChatRoomList from './Components/ChatRoomList';
+
 import LoginModal from './Components/LoginModal';
 import Main from './Views/Main';
 
